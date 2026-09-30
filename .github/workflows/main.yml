@@ -1,0 +1,34 @@
+name: Build J2ME Loader APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Extract source ZIP
+        run: |
+          mkdir project
+          unzip -q J2ME-Loader-background-github-actions.zip -d project
+
+      - name: Find project folder
+        run: |
+          echo "Searching for Gradle project..."
+          find project -name gradlew -type f
+
+      - name: Build APK
+        run: |
+          chmod +x $(find project -name gradlew -type f | head -1)
+          cd $(dirname $(find project -name gradlew -type f | head -1))
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: J2ME-Loader-background-APK
+          path: "**/build/outputs/apk/**/*.apk"
